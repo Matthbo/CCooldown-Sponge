@@ -13,6 +13,7 @@ import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommandCcooldown implements CommandCallable {
@@ -99,6 +100,14 @@ public class CommandCcooldown implements CommandCallable {
 
     @Override
     public List<String> getSuggestions(CommandSource source, String arguments) throws CommandException {
+        if(source.hasPermission(PermissionList.admin)) {
+            List<String> suggest = new ArrayList<>();
+            suggest.add("enable");
+            suggest.add("disable");
+            suggest.add("auto on");
+            suggest.add("auto off");
+            return suggest;
+        }
         return null;
     }
 
