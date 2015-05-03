@@ -9,7 +9,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.service.config.DefaultConfig;
 
-import java.io.File;
+import java.io.*;
 
 public class Config {
 
@@ -29,14 +29,14 @@ public class Config {
     public String messages_LANG = "messages";
     public String time_LANG = "time";
     public String warning_LANG = "warning";
+    public String cfgVersion_LANG = "cfgVersion";
 
     public void initCfg(){
         configFile = new File(cc.getDataFolder(), "config.cfg");
         if(!configFile.exists()){
             cc.getLogger().info("Creating a new config file!");
             makeCfg();
-        }
-        loadCfg();
+        }else loadCfg();
     }
 
     private void loadCfg(){
@@ -44,8 +44,8 @@ public class Config {
         CommentedConfigurationNode format = null;
         try{
             format = loader.load();
-            cfgVersion = format.getNode("cfgVersion").getString();
-            if(!cfgVersion.equalsIgnoreCase(Refs.VERSION)){
+            cfgVersion = format.getNode(cfgVersion_LANG).getString();
+            if(!cfgVersion.equalsIgnoreCase(Refs.VERSION) || cfgVersion == null){
                 try{
                     File dataFolder = cc.getDataFolder();
                     File oldCfgFile = new File(dataFolder, "config_old.cfg");
@@ -62,28 +62,36 @@ public class Config {
             autoOn = format.getNode(autoOn_LANG).getBoolean();
             messages = format.getNode(messages_LANG).getInt();
         }catch(Exception e){
+            e.printStackTrace();
             cc.getLogger().error("Couldn't load the config file!");
         }
     }
 
     private void makeCfg(){
-        ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setFile(configFile).build();
-        CommentedConfigurationNode format = null;
         try{
-            cc.getDataFolder().mkdir();
+            if(!cc.getDataFolder().exists())cc.getDataFolder().mkdir();
             configFile.createNewFile();
-            loader.createEmptyNode(ConfigurationOptions.defaults());
-            format = loader.load();
-            format.getNode(isOn_LANG).setValue(true);
-            format.getNode(time_LANG).setValue(20).setComment("time in seconds");
-            format.getNode(warning_LANG).setValue("You send the message to quickly!");
-            format.getNode(autoOn_LANG).setValue(false);
-            format.getNode(messages_LANG).setValue(10).setComment("the amount of messages needed to turn auto on");
-            format.getNode("cfgVersion").setValue(Refs.VERSION).setComment("DO NOT CHANGE!!!");
-            loader.save(format);
-        }catch (Exception e){
+            OutputStream output = new FileOutputStream(configFile);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output));
+
+            writer.write("isOn="+isOn+"\n");
+            writer.write("autoOn="+autoOn+"\n");
+            writer.write("# time in seconds\n");
+            writer.write("time="+time+"\n");
+            writer.write("warning=\"You send the message to quickly!\"\n"); //edit this if warning is different
+            writer.write("# the amount of messages needed to turn autoOn on\n");
+            writer.write("messages=" + messages + "\n");
+            writer.write("\n# DO NOT EDIT!\n");
+            writer.write("cfgVersion="+Refs.VERSION+"\n");
+
+            writer.flush();
+            output.close();
+        }catch (Exception e) {
             e.printStackTrace();
+            cc.getLogger().error("Couldn't create a new config file!");
         }
+
+
     }
 
     public void set(String node, Object value){

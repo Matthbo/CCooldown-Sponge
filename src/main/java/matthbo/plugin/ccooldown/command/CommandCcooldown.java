@@ -44,9 +44,7 @@ public class CommandCcooldown implements CommandCallable {
     public Optional<CommandResult> process(CommandSource sender, String argsuments) throws CommandException {
         if(sender.hasPermission(PermissionList.admin)){
             String[] args = argsuments.split(" ");
-            cc.getLogger().info(String.valueOf(args.length));
             if(args.length > 0 && !args[0].equalsIgnoreCase("")){
-                cc.getLogger().info(args[0]);
                 if(args.length == 1 && args[0].equalsIgnoreCase("disable")){
                     if(!config.isOn){sender.sendMessage(sendMSG("ChatCooldown is already Disabled!")); return Optional.of(CommandResult.success());}
                     config.isOn = false;

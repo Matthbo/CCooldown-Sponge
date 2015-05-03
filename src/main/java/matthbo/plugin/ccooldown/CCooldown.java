@@ -43,7 +43,7 @@ public class CCooldown {
 
     @Subscribe
     public void onDisabled(ServerStoppingEvent event){
-        getLogger().info("CCooldown is Disconnected from the Internet!");
+        getLogger().info("CCooldown has been Disabled!");
     }
 
     public Logger getLogger() {
