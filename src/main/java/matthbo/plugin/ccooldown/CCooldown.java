@@ -2,6 +2,8 @@ package matthbo.plugin.ccooldown;
 
 import com.google.inject.Inject;
 import matthbo.plugin.ccooldown.command.CommandCcooldown;
+import matthbo.plugin.ccooldown.config.Config;
+import matthbo.plugin.ccooldown.event.EventHandler;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Subscribe;
@@ -19,18 +21,22 @@ public class CCooldown {
 
     @Inject
     private Logger logger;
-
     @Inject
     private Game game;
 
+    private Config config;
     private File dataFolder = new File("mods/",Refs.NAME);
 
     @Subscribe
     public void onEnabled(ServerStartingEvent event){
         instance = this;
+        config = new Config();
+
+        config.initCfg();
 
         CommandService cmdService = getGame().getCommandDispatcher();
         cmdService.register(instance, new CommandCcooldown(), "ccooldown");
+        getGame().getEventManager().register(instance, new EventHandler());
 
         getLogger().info("CCooldown has been Activated");
     }
@@ -46,6 +52,10 @@ public class CCooldown {
 
     public Game getGame(){
         return game;
+    }
+
+    public Config getConfig(){
+        return config;
     }
 
     public File getDataFolder(){
