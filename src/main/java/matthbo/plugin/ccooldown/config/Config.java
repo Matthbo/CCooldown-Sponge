@@ -16,7 +16,7 @@ public class Config {
     private CCooldown cc = CCooldown.instance;
     public File configFile = new File(cc.getDataFolder(), "config.cfg");
 
-    public boolean isOn = true;
+    public boolean isOn = false;
     public boolean autoOn = false;
     public int time = 20;
     public String warning = "You send the message to quickly!";
@@ -44,7 +44,7 @@ public class Config {
         CommentedConfigurationNode format = null;
         try{
             format = loader.load();
-            cfgVersion = format.getNode(cfgVersion_LANG).getString();
+            cfgVersion = format.getNode("DONOTEDIT", cfgVersion_LANG).getString();
             if(!cfgVersion.equalsIgnoreCase(Refs.VERSION) || cfgVersion == null){
                 try{
                     File dataFolder = cc.getDataFolder();
@@ -71,21 +71,17 @@ public class Config {
         try{
             if(!cc.getDataFolder().exists())cc.getDataFolder().mkdir();
             configFile.createNewFile();
-            OutputStream output = new FileOutputStream(configFile);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output));
-
-            writer.write("isOn="+isOn+"\n");
-            writer.write("autoOn="+autoOn+"\n");
-            writer.write("# time in seconds\n");
-            writer.write("time="+time+"\n");
-            writer.write("warning=\"You send the message to quickly!\"\n"); //edit this if warning is different
-            writer.write("# the amount of messages needed to turn autoOn on\n");
-            writer.write("messages=" + messages + "\n");
-            writer.write("\n# DO NOT EDIT!\n");
-            writer.write("cfgVersion="+Refs.VERSION+"\n");
-
-            writer.flush();
-            output.close();
+            ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder().setFile(configFile).build();
+            CommentedConfigurationNode format = null;
+            loader.createEmptyNode(ConfigurationOptions.defaults());
+            format = loader.load();
+            format.getNode(isOn_LANG).setValue(isOn);
+            format.getNode(autoOn_LANG).setValue(false);
+            format.getNode(time_LANG).setValue(time).setComment("Time in seconds");
+            format.getNode(warning_LANG).setValue(warning);
+            format.getNode(messages_LANG).setValue(messages).setComment("The amount of messages needed to turn auto on");
+            format.getNode("DONOTEDIT", cfgVersion_LANG).setValue(Refs.VERSION);
+            loader.save(format);
         }catch (Exception e) {
             e.printStackTrace();
             cc.getLogger().error("Couldn't create a new config file!");
